@@ -2,5 +2,7 @@
 name = "copy_as_bytes"
 version = "0.1.0"
 edition = "2021"
+description = "Simple stack-based byte encoding for sized types"
+license = "MIT"
 
 [dependencies]
