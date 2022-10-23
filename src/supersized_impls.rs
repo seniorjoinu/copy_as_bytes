@@ -51,6 +51,10 @@ impl_for_primitive_arr!(isize);
 impl_for_primitive_arr!(bool);
 impl_for_primitive_arr!(());
 
+impl<T: SuperSized> SuperSized for Option<T> {
+    const SIZE: usize = 1 + T::SIZE;
+}
+
 impl<A: SuperSized> SuperSized for (A,) {
     const SIZE: usize = A::SIZE;
 }

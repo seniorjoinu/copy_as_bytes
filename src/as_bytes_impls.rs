@@ -78,14 +78,59 @@ impl AsBytes for () {
     fn from_bytes(_: [u8; size_of::<Self>()]) -> Self {}
 }
 
-impl AsBytes for [u8; 128] {
-    #[inline]
+macro_rules! impl_for_u8_arr {
+    ($size:expr) => {
+        impl AsBytes for [u8; $size] {
+            #[inline]
+            fn to_bytes(self) -> [u8; Self::SIZE] {
+                self
+            }
+
+            #[inline]
+            fn from_bytes(arr: [u8; Self::SIZE]) -> Self {
+                arr
+            }
+        }
+    };
+}
+
+impl_for_u8_arr!(0);
+impl_for_u8_arr!(1);
+impl_for_u8_arr!(2);
+impl_for_u8_arr!(4);
+impl_for_u8_arr!(8);
+impl_for_u8_arr!(16);
+impl_for_u8_arr!(29); // for principals
+impl_for_u8_arr!(32);
+impl_for_u8_arr!(64);
+impl_for_u8_arr!(128);
+impl_for_u8_arr!(256);
+impl_for_u8_arr!(512);
+impl_for_u8_arr!(1024);
+impl_for_u8_arr!(2048);
+impl_for_u8_arr!(4096);
+
+impl<T: AsBytes> AsBytes for Option<T>
+    where [(); T::SIZE]: Sized,
+{
     fn to_bytes(self) -> [u8; Self::SIZE] {
-        self
+        let mut buf = [0u8; Self::SIZE];
+        if let Some(it) = self {
+            buf[0] = 1;
+            buf[1..].copy_from_slice(&it.to_bytes());
+        }
+
+        buf
     }
 
-    #[inline]
     fn from_bytes(arr: [u8; Self::SIZE]) -> Self {
-        arr
+        if arr[0] == 0 {
+            None
+        } else {
+            let mut buf = [0u8; T::SIZE];
+            buf.copy_from_slice(&arr[1..]);
+            
+            Some(T::from_bytes(buf))
+        }
     }
 }
